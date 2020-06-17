@@ -52,7 +52,11 @@ class Qt6QLatin1StringToU
 public:
     explicit Qt6QLatin1StringToU(const std::string &name, ClazyContext *context);
     void VisitStmt(clang::Stmt *stmt) override;
+    void VisitMacroExpands(const clang::Token &MacroNameTok,
+                           const clang::SourceRange &range, const clang::MacroInfo *minfo = nullptr) override;
 private:
+    //void VisitMacroExpands(const clang::SourceRange &range) override;
+    std::vector<clang::SourceLocation> m_listingMacroExpand;
     std::vector<clang::FixItHint> fixitReplace(clang::Stmt *stmt);
 
 };
