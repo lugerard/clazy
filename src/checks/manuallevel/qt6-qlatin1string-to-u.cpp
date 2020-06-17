@@ -49,6 +49,7 @@ using namespace std;
 Qt6QLatin1StringToU::Qt6QLatin1StringToU(const std::string &name, ClazyContext *context)
     : CheckBase(name, context, Option_CanIgnoreIncludes)
 {
+    enablePreProcessorCallbacks();
 }
 
 static bool isInterestingParam(ParmVarDecl *param)
@@ -89,6 +90,12 @@ void Qt6QLatin1StringToU::VisitStmt(clang::Stmt *stmt)
             return;
         message = "QLatin1String(const char *) ctor being called";
         // TODO: check that there is no macro in the source range of the stmt.
+        for (auto macro_pos : m_listingMacroExpand) {
+            if ( m_sm.isPointWithin(macro_pos , stmt->getBeginLoc(), stmt->getEndLoc())) {
+               emitWarning(clazy::getLocStart(stmt), message, fixits);
+               return;
+            }
+        }
         fixits = fixitReplace(stmt);
     } else {
         return;
@@ -154,4 +161,10 @@ std::vector<FixItHint> Qt6QLatin1StringToU::fixitReplace(clang::Stmt *stmt)
     vector<FixItHint> fixits;
     fixits.push_back(FixItHint::CreateReplacement(stmt->getSourceRange(), replacement));
     return fixits;
+}
+
+void Qt6QLatin1StringToU::VisitMacroExpands(const clang::Token &MacroNameTok, const clang::SourceRange &range, const MacroInfo *)
+{
+    m_listingMacroExpand.push_back(range.getBegin());
+    return;
 }

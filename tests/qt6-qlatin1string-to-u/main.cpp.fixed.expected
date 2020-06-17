@@ -22,6 +22,6 @@ void test()
 
     const char* myChar = "foo";
     QString ww = QLatin1String(myChar); // should not be fixed
-    QString string_with_macro = QLatin1String(PREFIX "bar"); // should not be fixed!!! (the test will fail)
+    QString string_with_macro = QLatin1String(PREFIX "bar"); // should not be fixed
 
 }
